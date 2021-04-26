@@ -1,0 +1,27 @@
+{
+  "name": "coin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "truffle compile && mocha --exit --recursive"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@openzeppelin/contracts": "^4.0.0",
+    "@openzeppelin/contracts-upgradeable": "^4.0.0",
+    "@openzeppelin/test-environment": "^0.1.9",
+    "@openzeppelin/test-helpers": "^0.5.10",
+    "chai": "^4.3.4",
+    "chai-bignumber": "^3.0.0",
+    "ganache-cli": "^6.12.2",
+    "mocha": "^8.3.2",
+    "openzeppelin-solidity": "^4.0.0",
+    "truffle": "^5.3.0"
+  },
+  "dependencies": {
+    "bignumber.js": "^9.0.1",
+    "openzeppelin-contracts": "^4.0.0"
+  }
+}
