@@ -6,14 +6,14 @@ Whenever a transfer takes place 3 things happen:
 
 1) 2% is burned and removed from total supply - sent to 0 address
 2) a 2% fee is taken and sent off to a marketing wallet
-3) a 10% is sent into liquidity pool
+3) an 8% is sent into liquidity wallet to further the project growth
 
 Example Transfer of 100 tokens
 
 2 tokens burned
 2 tokens sent to marketing
-10 tokens sent to contract address
-86 tokens sent to recipient of transfer
+8 tokens sent to contract address
+88 tokens sent to recipient of transfer
 
 */
 
@@ -101,7 +101,9 @@ contract TheRedORder is Context, Ownable, IERC20 {
 
         uint256 currentAllowance = _allowances[sender][_msgSender()];
         require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
-        _approve(sender, _msgSender(), currentAllowance - amount);
+        
+        uint256 newAllowance = currentAllowance.sub(amount);
+        _approve(sender, _msgSender(), newAllowance);
 
         return true;
     }
@@ -109,7 +111,8 @@ contract TheRedORder is Context, Ownable, IERC20 {
     // the person calling this function INCREASES the allowance of the address called [@param1] can spend
     // on their belave by the amount send [@param2]
     function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
-        _approve(_msgSender(), spender, _allowances[_msgSender()][spender] + addedValue);
+        uint256 newAllowance = _allowances[_msgSender()][spender].add(addedValue);
+        _approve(_msgSender(), spender, newAllowance);
         return true;
     }
 
@@ -118,30 +121,34 @@ contract TheRedORder is Context, Ownable, IERC20 {
     function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
         uint256 currentAllowance = _allowances[_msgSender()][spender];
         require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
-        _approve(_msgSender(), spender, currentAllowance - subtractedValue);
+
+        uint256 newAllowance = currentAllowance.sub(subtractedValue);
+        _approve(_msgSender(), spender, newAllowance);
 
         return true;
     }
 
     // performs a transfer from address 1 [@param2] to address 2 [@param 2] in the amount
-    // that is specified [@param 3]. Fees in the total amount of 14% are deducted. 2% goes
-    // into a marketing walled, 2% is removed from total supply, 10% goes to liquidity pool
+    // that is specified [@param 3]. Fees in the total amount of 12% are deducted. 2% goes
+    // into a marketing walled, 2% is removed from total supply, 8% goes to liquidity wallet
     function _transfer(address sender, address recipient, uint256 amount) internal virtual {
         require(sender    != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
         // amount to send to the marketing wallet (2%)
-        uint256 marketingFee  = amount.div(100).mul(2);
+        uint256 marketingFee  = amount.mul(2).div(100);
         // amount to burn of the total supply (2%)
-        uint256 burnFee       = amount.div(100).mul(2);
-        // amount to send into pool (10%)
-        uint256 liquidityFee  = amount.div(100).mul(10);
+        uint256 burnFee       = amount.mul(2).div(100);
+        // amount to send into pool (8%)
+        uint256 liquidityFee  = amount.mul(8).div(100);
 
         // declare the amount the sender has in their account
         uint256 senderBalance = _balances[sender];
 
         // declare amount that actually gets transfered after burn, liquidity, and marketing fees
-        uint256 totalTransfer = amount.sub(marketingFee).sub(burnFee).sub(liquidityFee);
+        uint256 totalTransfer   = amount.sub(marketingFee);
+        totalTransfer           = totalTransfer.sub(burnFee);
+        totalTransfer           = totalTransfer.sub(liquidityFee);
 
         _beforeTokenTransfer(sender, recipient, amount);
 
@@ -157,7 +164,7 @@ contract TheRedORder is Context, Ownable, IERC20 {
         // add the burn balance to address 0
         _balances[address(0)]       += burnFee;
         // send taxed amount to the contract
-        _balances[address(this)]    += liquidityFee;
+        _balances[owner()]    += liquidityFee;
 
         // subtract burn fee from total supply
         _totalSupply = _totalSupply.sub(burnFee);
@@ -168,9 +175,8 @@ contract TheRedORder is Context, Ownable, IERC20 {
         emit Transfer(sender, _marketingWallet, marketingFee);
         // transfer the burn fee to the 0 address
         emit Transfer(sender, address(0), burnFee);
-        // send the tax amount to the contract
-        // ? this should be increasing the liquidity pool ?
-        emit Transfer(sender, address(this), liquidityFee);
+        // send the tax amount to the liquidity wallet
+        emit Transfer(sender, owner(), liquidityFee);
 
     }
 
