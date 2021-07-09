@@ -1,22 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-/*
-
-Whenever a transfer takes place 3 things happen:
-
-1) 2% is burned and removed from total supply - sent to 0 address
-2) a 2% fee is taken and sent off to a marketing wallet
-3) an 8% is sent into liquidity wallet to further the project growth
-
-Example Transfer of 100 tokens
-
-2 tokens burned
-2 tokens sent to marketing
-8 tokens sent to contract address
-88 tokens sent to recipient of transfer
-
-*/
-
 pragma solidity ^0.8.0;
 
 import "openzeppelin-contracts/token/ERC20/IERC20.sol";
@@ -24,7 +7,7 @@ import "openzeppelin-contracts/GSN/Context.sol";
 import "openzeppelin-contracts/math/SafeMath.sol";
 import "openzeppelin-contracts/access/Ownable.sol";
 
-contract TheRedORder is Context, Ownable, IERC20 {
+contract TheRedOrder is Context, Ownable, IERC20 {
 
     using SafeMath for uint256;
 
@@ -34,15 +17,14 @@ contract TheRedORder is Context, Ownable, IERC20 {
     mapping (address => mapping (address => uint256)) private _allowances;
 
     string  private _name               = "TheRedOrder";
-    string  private _symbol             = "REDORDER";
+    string  private _symbol             = "ORDR";
 
     // 18 decimal contract
     uint8   private _decimals           = 18;
     // 1 trillion * decimal count
-    uint256 private _totalSupply        = 1000000 * 10**6 * 10**18;
+    uint256 private _totalSupply        = 500000 * 10**6 * 10**18;
 
-    // TODO: change this out with the final marketing wallet address
-    address private _marketingWallet    = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
+    address private _marketingWallet    = 0xcdcacbAc38785E462dAe096b55a86A05419A060a;
 
     // send total supply to the address that has created the contract
     constructor () {
@@ -139,8 +121,8 @@ contract TheRedORder is Context, Ownable, IERC20 {
         uint256 marketingFee  = amount.mul(2).div(100);
         // amount to burn of the total supply (2%)
         uint256 burnFee       = amount.mul(2).div(100);
-        // amount to send into pool (8%)
-        uint256 liquidityFee  = amount.mul(8).div(100);
+        // amount to send into pool (2%)
+        uint256 liquidityFee  = amount.mul(2).div(100);
 
         // declare the amount the sender has in their account
         uint256 senderBalance = _balances[sender];
